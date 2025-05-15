@@ -120,3 +120,5 @@ require (
 replace github.com/base/op-enclave/op-enclave => ./op-enclave
 
 replace github.com/ethereum/go-ethereum => github.com/ethereum-optimism/op-geth v1.101503.2
+
+replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.3-hotfix
