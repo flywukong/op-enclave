@@ -64,3 +64,36 @@ verify:
 	@$(call verify,"contracts/broadcast/DeployCertManager.s.sol/84532/run-1736384133.json","0.8.24")
 	@$(call verify,"contracts/broadcast/DeploySystem.s.sol/84532/run-1736385859.json","0.8.15")
 	#@$(call verify,"contracts/broadcast/DeployDeployChain.s.sol/84532/run-1733884066.json","0.8.15")
+
+.PHONY: op-batcher
+op-batcher:
+	@echo "Building op-batcher..."
+	@mkdir -p build
+	@cd op-batcher && go build -o ../build/op-batcher ./cmd/main.go
+	@echo "op-batcher binary has been built and placed in build/ directory"
+
+.PHONY: op-proposer
+op-proposer:
+	@echo "Building op-proposer..."
+	@mkdir -p build
+	@cd op-proposer && go build -o ../build/op-proposer ./cmd/main.go
+	@echo "op-proposer binary has been built and placed in build/ directory"
+
+.PHONY: op-enclave
+op-enclave:
+	@echo "Building op-enclave..."
+	@mkdir -p build
+	@cd op-enclave && go build -o ../build/op-enclave ./cmd/enclave/main.go
+	@echo "op-enclave binary has been built and placed in build/ directory"
+	@cd op-enclave && go build -o ../build/op-enclave-server ./cmd/server/main.go
+	@echo "op-enclave-server binary has been built and placed in build/ directory"
+
+.PHONY: clear
+clear:
+	@echo "Cleaning build directory..."
+	@rm -rf build
+	@echo "Build directory has been cleaned"
+
+.PHONY: all
+all: op-batcher op-proposer op-enclave
+	@echo "All components have been built successfully"
