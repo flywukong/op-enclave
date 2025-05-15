@@ -10,8 +10,8 @@ import (
 	"github.com/base/op-enclave/bindings"
 	"github.com/base/op-enclave/op-withdrawer/withdrawals"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
-	"github.com/ethereum-optimism/optimism/op-service/ctxinterrupt"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
+	"github.com/ethereum-optimism/optimism/op-service/opio"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -81,7 +81,7 @@ func main() {
 		},
 	}
 
-	ctx := ctxinterrupt.WithSignalWaiterMain(context.Background())
+	ctx := opio.WithSignalWaiterMain(context.Background())
 	err := app.RunContext(ctx, os.Args)
 	if err != nil {
 		log.Crit("Application failed", "message", err)
