@@ -1,0 +1,11 @@
+.github
+.vscode
+
+node_modules
+**/node_modules
+.env
+**/.env
+
+build/_workspace
+build/bin
+build/_bin
