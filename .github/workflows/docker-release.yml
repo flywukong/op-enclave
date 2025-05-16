@@ -75,7 +75,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./op-batcher
+          context: .
           file: ./op-batcher/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -110,7 +110,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./op-proposer
+          context: .
           file: ./op-proposer/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

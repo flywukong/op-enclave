@@ -6,6 +6,11 @@ node_modules
 .env
 **/.env
 
+tests/
+docs/
+*.log
+*.md
+
 build/_workspace
 build/bin
 build/_bin
