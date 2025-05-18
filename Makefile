@@ -75,6 +75,7 @@ op-batcher:
 .PHONY: op-proposer
 op-proposer:
 	@echo "Building op-proposer..."
+	@go mod tidy
 	@mkdir -p build
 	@cd op-proposer && go build -o ../build/op-proposer ./cmd/main.go
 	@echo "op-proposer binary has been built and placed in build/ directory"
@@ -83,9 +84,9 @@ op-proposer:
 op-enclave:
 	@echo "Building op-enclave..."
 	@mkdir -p build
-	@cd op-enclave && go build -o ../build/op-enclave ./cmd/enclave/main.go
+	@cd op-enclave && go mod tidy && go build -o ../build/op-enclave ./cmd/enclave/main.go
 	@echo "op-enclave binary has been built and placed in build/ directory"
-	@cd op-enclave && go build -o ../build/op-enclave-server ./cmd/server/main.go
+	@cd op-enclave && go mod tidy && go build -o ../build/op-enclave-server ./cmd/server/main.go
 	@echo "op-enclave-server binary has been built and placed in build/ directory"
 
 .PHONY: clear

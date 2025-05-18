@@ -12,15 +12,17 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/hashicorp/go-multierror"
 )
 
 type Prover struct {
-	config     *enclave.PerChainConfig
-	configHash common.Hash
-	l1         L1Client
-	l2         L2Client
-	enclave    enclave.RPC
+	config      *enclave.PerChainConfig
+	chainConfig *params.ChainConfig
+	configHash  common.Hash
+	l1          L1Client
+	l2          L2Client
+	enclave     enclave.RPC
 }
 
 type Proposal struct {
@@ -42,13 +44,17 @@ func NewProver(
 		return nil, fmt.Errorf("failed to fetch rollup config: %w", err)
 	}
 	cfg := enclave.FromRollupConfig(rollupConfig)
-
+	chainConfig, err := l2.ChainConfig(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch chain config: %w", err)
+	}
 	return &Prover{
-		config:     cfg,
-		configHash: cfg.Hash(),
-		l1:         l1,
-		l2:         l2,
-		enclave:    enclav,
+		config:      cfg,
+		chainConfig: chainConfig,
+		configHash:  cfg.Hash(),
+		l1:          l1,
+		l2:          l2,
+		enclave:     enclav,
 	}, nil
 }
 
@@ -144,6 +150,7 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
 		o.config,
+		o.chainConfig,
 		l1Origin.value,
 		l1Receipts.value,
 		previousTxs,

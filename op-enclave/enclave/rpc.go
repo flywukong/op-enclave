@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 const Namespace = "enclave"
@@ -22,6 +23,7 @@ type RPC interface {
 	ExecuteStateless(
 		ctx context.Context,
 		config *PerChainConfig,
+		chainConfig *params.ChainConfig,
 		l1Origin *types.Header,
 		l1Receipts types.Receipts,
 		previousBlockTxs []hexutil.Bytes,

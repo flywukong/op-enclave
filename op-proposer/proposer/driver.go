@@ -258,6 +258,7 @@ func (l *L2OutputSubmitter) generateOutputs(ctx context.Context, latestOutput bi
 	}
 
 	// calculate `aggregateBatchSize` proofs at once, which are then aggregated in `nextOutput`
+	// TODO:: after debugging is stable, l.prover.Generate should be optimized to parallel execution
 	for i := uint64(0); i < aggregateBatchSize; i++ {
 		number := i + latestOutputNumber + 1
 		block, err := l.L2Client.BlockByNumber(ctx, new(big.Int).SetUint64(number))
