@@ -17,7 +17,6 @@ import {L2OutputOracle} from "../src/L2OutputOracle.sol";
 import {OwnerConfig} from "../src/OwnerConfig.sol";
 import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
 import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";
-import {EnclaveDeployer} from "./EnclaveDeployer.sol";
 import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
