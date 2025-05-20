@@ -292,9 +292,6 @@ func (s *Server) ExecuteStateless(
 		return nil, fmt.Errorf("failed to sign: %w", err)
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	return &Proposal{
 		OutputRoot:    outputRoot,
 		Signature:     sig,
