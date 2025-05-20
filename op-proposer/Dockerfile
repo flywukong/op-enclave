@@ -16,7 +16,7 @@ RUN make op-proposer TARGETOS=$TARGETOS TARGETARCH=$TARGETARCH
 
 FROM alpine:3.19
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates libstdc++
 
 COPY --from=builder /app/op-proposer/bin/op-proposer /usr/local/bin
 
