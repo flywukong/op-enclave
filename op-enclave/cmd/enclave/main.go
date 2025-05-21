@@ -25,7 +25,8 @@ func main() {
 
 	listener, err := vsock.Listen(1234, &vsock.Config{})
 	if err != nil {
-		log.Warn("Error opening vsock listener, running in HTTP mode", "error", err)
+		log.Crit(("Error opening vsock listener, running in HTTP mode", "error", err)
+		panic("error start")
 		err = http.ListenAndServe(":1234", s)
 	} else {
 		err = s.ServeListener(listener)
