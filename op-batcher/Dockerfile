@@ -16,7 +16,7 @@ RUN make op-batcher TARGETOS=$TARGETOS TARGETARCH=$TARGETARCH
 
 FROM alpine:3.19
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates libstdc++
 
 COPY --from=builder /app/op-batcher/bin/op-batcher /usr/local/bin
 
