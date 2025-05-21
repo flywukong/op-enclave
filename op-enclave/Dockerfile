@@ -5,7 +5,7 @@ FROM ghcr.io/mdehoog/aws-nitro-enclaves-sdk-bootstrap@sha256:6e5e53bd47370dbc192
 # === Golang builder：使用 alpine + musl-dev 进行静态编译 ===
 FROM golang:1.22-alpine AS builder
 
-RUN apk add --no-cache musl-dev gcc
+RUN apk add --no-cache musl-dev gcc g++ make
 
 WORKDIR /build
 
@@ -14,8 +14,12 @@ RUN go mod download
 
 COPY . .
 
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=amd64
+
 # ✅ 静态编译 Go 程序（适配 Nitro Enclaves 无 libc 环境）
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags '-static'" -o bin/enclave ./cmd/enclave
+RUN go build -ldflags="-linkmode external -extldflags -static" -o bin/enclave ./cmd/enclave
 
 # 拉入 init/user ramdisk 配置
 COPY eif eif/
