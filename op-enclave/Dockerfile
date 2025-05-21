@@ -1,41 +1,39 @@
-# Stage 1: Bootstrap
+# === Base Bootstrap 镜像：用于构建 Linuxkit initrd、拉取 bootstrap bzImage ===
 FROM ghcr.io/mdehoog/aws-nitro-enclaves-sdk-bootstrap@sha256:6e5e53bd47370dbc1920208e93d222533a36f9f5dc85615591cbfe56a03312b0 AS bootstrap
 
-# Stage 2: Go Build (静态链接 + 支持 cgo)
-FROM golang@sha256:367bb5295d3103981a86a572651d8297d6973f2ec8b62f716b007860e22cbc25 AS builder
 
-# ✅ 安装静态链接编译依赖（Alpine 构建工具链）
-RUN apt-get update && \
-    apt-get install -y musl-dev musl-tools build-essential git && \
-    ln -s /usr/bin/musl-gcc /usr/local/bin/musl-gcc
+# === Golang builder：使用 alpine + musl-dev 进行静态编译 ===
+FROM golang:1.22-alpine AS builder
 
-ENV CGO_ENABLED=1
-ENV CC=musl-gcc
-
-RUN go install github.com/linuxkit/linuxkit/src/cmd/linuxkit@270fd1c5aa1986977b31af6c743c6a2681f67a29
+RUN apk add --no-cache musl-dev gcc
 
 WORKDIR /build
-RUN mkdir -p /build
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-# ✅ 强制静态编译
-RUN go build -ldflags '-extldflags "-static"' -o bin/enclave ./cmd/enclave
+# ✅ 静态编译 Go 程序（适配 Nitro Enclaves 无 libc 环境）
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags '-static'" -o bin/enclave ./cmd/enclave
 
+# 拉入 init/user ramdisk 配置
 COPY eif eif/
 COPY --from=bootstrap /build/out bootstrap
+
+# 安装并使用 linuxkit 构建 initrd 镜像
+RUN go install github.com/linuxkit/linuxkit/src/cmd/linuxkit@270fd1c5aa1986977b31af6c743c6a2681f67a29
 RUN linuxkit build --format kernel+initrd --no-sbom --name init-ramdisk ./eif/init-ramdisk.yaml
 RUN linuxkit build --format kernel+initrd --no-sbom --name user-ramdisk ./eif/user-ramdisk.yaml
 
-# Stage 3: Build EIF
-FROM rust@sha256:29fe4376919e25b7587a1063d7b521d9db735fc137d3cf30ae41eb326d209471 AS eif
+
+# === 构建 EIF 镜像（使用官方 rust 编译 eif_build 工具）===
+FROM rust:1.80.1 AS eif
 
 RUN mkdir /build
 WORKDIR /build
 
+# 拉取 aws-nitro-enclaves-image-format 工具
 ENV REPO=https://github.com/aws/aws-nitro-enclaves-image-format.git
 ENV COMMIT=483114f1da3bad913ad1fb7d5c00dadacc6cbae6
 RUN git init && \
@@ -45,11 +43,13 @@ RUN git init && \
 
 RUN cargo build --all --release
 
+# 拷贝必要的构建资源
 COPY eif/cmdline-x86_64 cmdline
 COPY --from=bootstrap /build/out bootstrap
 COPY --from=builder /build/init-ramdisk-initrd.img .
 COPY --from=builder /build/user-ramdisk-initrd.img .
 
+# ✅ 构建最终的 EIF 镜像
 RUN ./target/release/eif_build \
     --kernel bootstrap/bzImage \
     --kernel_config bootstrap/bzImage.config \
@@ -58,11 +58,11 @@ RUN ./target/release/eif_build \
     --ramdisk user-ramdisk-initrd.img \
     --output eif.bin
 
-# Final stage: Extract final eif.bin
+
+# === 最终 stage：产出 eif.bin ===
 FROM busybox
 
 RUN mkdir /build
 WORKDIR /build
 
 COPY --from=eif /build/eif.bin .
-
